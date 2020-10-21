@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from .serializers import userSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -13,3 +14,11 @@ def apiOverview(request):
         'create': '/user/create'
     }
     return Response(api_urls)
+
+
+@api_view(['POST'])
+def adduser(request):
+    serializer = userSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
