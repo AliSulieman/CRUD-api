@@ -33,8 +33,16 @@ def listUsers(request):
 
 @api_view(['POST'])
 def updateUser(request, pk):
-    users = user.objects.get(id=pk)
-    serializer = userSerializer(instance=users, data=request.data)
+    one_user = user.objects.get(id=pk)
+    serializer = userSerializer(instance=one_user, data=request.data)
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
+
+
+@api_view(['DELETE'])
+def deleteuser(request, pk):
+    one_user = user.objects.get(id=pk)
+    one_user.delete()
+
+    return Response('user has been succsesfully deleted !!')

@@ -21,6 +21,7 @@ urlpatterns = [
     path('', views.apiOverview, name="api-overview"),
     path('add-user/', views.adduser, name="create user"),
     path('list-user/', views.listUsers, name="list user"),
-    path('update-user/<str:pk>/', views.updateUser, name="update user")
+    path('update-user/<str:pk>/', views.updateUser, name="update user"),
+    path('delete-user/<str:pk>/', views.deleteuser, name="delete user")
 
 ]
