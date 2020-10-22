@@ -29,3 +29,12 @@ def listUsers(request):
     users = user.objects.all()
     serializer = userSerializer(users, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def updateUser(request, pk):
+    users = user.objects.get(id=pk)
+    serializer = userSerializer(instance=users, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)

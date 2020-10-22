@@ -20,5 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.apiOverview, name="api-overview"),
     path('add-user/', views.adduser, name="create user"),
-    path('list-user/', views.listUsers, name="list user")
+    path('list-user/', views.listUsers, name="list user"),
+    path('update-user/<str:pk>/', views.updateUser, name="update user")
+
 ]
