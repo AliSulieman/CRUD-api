@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .serializers import userSerializer
-
+from .models import user
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -21,4 +21,11 @@ def adduser(request):
     serializer = userSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def listUsers(request):
+    users = user.objects.all()
+    serializer = userSerializer(users, many=True)
     return Response(serializer.data)
