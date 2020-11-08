@@ -5,8 +5,6 @@ from .models import user
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-# Create your views here.
-
 
 @api_view(['GET'])
 def apiOverview(request):
@@ -46,3 +44,6 @@ def deleteuser(request, pk):
     one_user.delete()
 
     return Response('user has been succsesfully deleted !!')
+
+
+# def user_exist(username):
