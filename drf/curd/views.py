@@ -4,6 +4,9 @@ from .serializers import userSerializer
 from .models import user
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.contrib.auth.models import User, auth
+from django.contrib import messages
+from rest_framework import status
 
 
 @api_view(['GET'])
@@ -16,20 +19,35 @@ def apiOverview(request):
 
 @api_view(['POST'])
 def adduser(request):
+
     serializer = userSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
 
 
-@api_view(['GET'])
-def listUsers(request):
-    users = user.objects.all()
-    serializer = userSerializer(users, many=True)
-    return Response(serializer.data)
-
-
 @api_view(['POST'])
+def listUsers(request):
+    print(request)
+    if request.method == 'POST':
+        email = request.data.get('email')
+        password = request.data.get('password')
+        try:
+            us = user.objects.get(email=email)
+            if us.email == email and us.password == password:
+                print(us)
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        except user.DoesNotExist:
+            print("User does not exit")
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print("Other err", e)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@ api_view(['POST'])
 def updateUser(request, pk):
     one_user = user.objects.get(id=pk)
     serializer = userSerializer(instance=one_user, data=request.data)
@@ -38,7 +56,7 @@ def updateUser(request, pk):
     return Response(serializer.data)
 
 
-@api_view(['DELETE'])
+@ api_view(['DELETE'])
 def deleteuser(request, pk):
     one_user = user.objects.get(id=pk)
     one_user.delete()
