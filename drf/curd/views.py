@@ -19,11 +19,30 @@ def apiOverview(request):
 
 @api_view(['POST'])
 def adduser(request):
-
     serializer = userSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
+
+    # if request.method == 'POST':
+    #     email = request.data.get('email')
+    #     # password = request.data.get('password')
+    #     try:
+    #         us = user.objects.get(email=email)
+    #         if us.email == None:
+    #             newUser = user(data=request.data)
+    #             newUser.save()
+    #             return Response(status=status.HTTP_200_OK)
+    #         else:
+    #             return Response(status=status.HTTP_400_BAD_REQUEST)
+    #     except user.DoesNotExist:
+    #         serializer = userSerializer(data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
+    #     except Exception as e:
+    #         print("Other err", e)
+    #         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -35,12 +54,10 @@ def listUsers(request):
         try:
             us = user.objects.get(email=email)
             if us.email == email and us.password == password:
-                print(us)
                 return Response(status=status.HTTP_200_OK)
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         except user.DoesNotExist:
-            print("User does not exit")
             return Response(status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print("Other err", e)
