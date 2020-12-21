@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from rest_framework import status
+import json
+from django.core.validators import validate_email
+import re
 
 
 @api_view(['GET'])
@@ -19,30 +22,32 @@ def apiOverview(request):
 
 @api_view(['POST'])
 def adduser(request):
-    serializer = userSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
+    if request.method != 'POST':
+        return Response(status=status.HTTP_405_BAD_REQUEST, data={"message": "Method Not Allowed"})
 
-    # if request.method == 'POST':
-    #     email = request.data.get('email')
-    #     # password = request.data.get('password')
-    #     try:
-    #         us = user.objects.get(email=email)
-    #         if us.email == None:
-    #             newUser = user(data=request.data)
-    #             newUser.save()
-    #             return Response(status=status.HTTP_200_OK)
-    #         else:
-    #             return Response(status=status.HTTP_400_BAD_REQUEST)
-    #     except user.DoesNotExist:
-    #         serializer = userSerializer(data=request.data)
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #         return Response(status=status.HTTP_404_NOT_FOUND)
-    #     except Exception as e:
-    #         print("Other err", e)
-    #         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    user_data = request.data
+    email = user_data["email"]
+    pass_word = user_data["password"]
+    if email_validator(email):
+        try:
+            us = user.objects.get(email=email)
+            if us.email:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "User Already exist"})
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        except user.DoesNotExist:
+            if len(pass_word) < 6:
+                return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={"message": "password is short"})
+            else:
+                newUser = user(
+                    fullname=user_data["fullname"], email=user_data["email"], password=user_data["password"])
+                newUser.save()
+                return Response(status=status.HTTP_201_CREATED, data={"message": "user created"})
+        except Exception as e:
+            print("Other err", e)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={"message": "not valid email"})
 
 
 @api_view(['POST'])
@@ -81,4 +86,9 @@ def deleteuser(request, pk):
     return Response('user has been succsesfully deleted !!')
 
 
-# def user_exist(username):
+def email_validator(email):
+    regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+    if(re.search(regex, email)):
+        return True
+    else:
+        return False
