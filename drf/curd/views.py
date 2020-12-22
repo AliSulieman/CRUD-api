@@ -8,8 +8,7 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from rest_framework import status
 import json
-from django.core.validators import validate_email
-import re
+from validate_email import validate_email
 
 
 @api_view(['GET'])
@@ -28,7 +27,7 @@ def adduser(request):
     user_data = request.data
     email = user_data["email"]
     pass_word = user_data["password"]
-    if email_validator(email):
+    if validate(email):
         try:
             us = user.objects.get(email=email)
             if us.email:
@@ -36,7 +35,7 @@ def adduser(request):
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         except user.DoesNotExist:
-            if len(pass_word) < 6:
+            if len(pass_word) < 6 or clean_email(email) == False:
                 return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={"message": "password is short"})
             else:
                 newUser = user(
@@ -47,7 +46,7 @@ def adduser(request):
             print("Other err", e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-        return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={"message": "not valid email"})
+        return Response(status=status.HTTP_401_UNAUTHORIZED, data={"message": "Email Is Not Valid"})
 
 
 @api_view(['POST'])
@@ -86,9 +85,16 @@ def deleteuser(request, pk):
     return Response('user has been succsesfully deleted !!')
 
 
-def email_validator(email):
-    regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-    if(re.search(regex, email)):
+def validate(email):
+    if validate_email(email):
         return True
     else:
         return False
+
+
+def clean_email(email):
+    my_Email = email.cleaned_data['email']
+    if '' not in my_Email:
+        return False
+    else:
+        return True
